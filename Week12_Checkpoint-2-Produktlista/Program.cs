@@ -1,25 +1,17 @@
-﻿//using System.Xml.Linq;
-using System.Linq;
-using System.Runtime.CompilerServices;
+﻿using System.Linq;
 
 List<Product> productsList = new List<Product>();
 bool addNewProduct = true;
-AddProduct(addNewProduct);
+AddProduct(productsList, addNewProduct);
 
-
-static void AddProduct(bool addNewProduct, bool shouldExit = false)
+static void AddProduct(List<Product> productsList, bool addNewProduct, bool shouldExit = false)
 {
-    //List<Product> products = productsList;
-    List<Product> productsList = new List<Product>();
-    string lastInput = string.Empty;
-
-    if (shouldExit) return;
+    if (!addNewProduct || shouldExit) return;
 
     do
     {
         Message.AskForNewProduct();
         string productCategory = Console.ReadLine() ?? String.Empty;
-        lastInput = productCategory;
 
         if (productCategory.ToLower().Trim() == "q")
         {
@@ -46,17 +38,15 @@ static void AddProduct(bool addNewProduct, bool shouldExit = false)
         }
     } while (addNewProduct);
 
-
     if (!addNewProduct)
     {
-        Console.WriteLine("-------------------------------------------------------");
-        Message.PrintAllProducts(productsList);
-        string command = Message.FollowUpMessage(true);
+        Message.ShowAllProducts(productsList);
+        string command = Message.ManageCommands(true);
 
         // ADD NEW PRODUCT
         if(command == "p")
         {
-            AddProduct(true);
+            AddProduct(productsList, true, false);
         }
         // SEARCH
         else if (command == "s")
@@ -70,28 +60,21 @@ static void AddProduct(bool addNewProduct, bool shouldExit = false)
 
             if(foundProducts.Count > 0)
             {
-                Message.PrintAllProducts(productsList, true, productToFind);
-                Message.FollowUpMessage(true);
+                Message.ShowAllProducts(productsList, true, productToFind);
+                Message.ManageCommands(true);
             }
             else
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"\nThe Product : '{productToFind}' was not found not");
                 Console.ResetColor();
-
+                Console.ReadKey();
             }
         }
         // QUIT
-        else if(command == "q")
-        {
-            AddProduct(false, true);
-            //Console.ReadKey();
-        }
-
+        else if(command == "q") return;
     }
 }
-
-
 
 class Product
 {
@@ -122,15 +105,18 @@ class Calculation
     {
         int sum = 0;
         foreach (Product product in products)
-        {
             sum += product.Price;
-        }
         return sum;
     }
 }
 
 class Message
 {
+    public static void WriteLine()
+    {
+        Console.WriteLine("-------------------------------------------------------");
+    }
+
     public static void AskForNewProduct()
     {
         Console.ForegroundColor = ConsoleColor.Yellow;
@@ -144,12 +130,12 @@ class Message
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("The product was successfully added!");
         Console.ResetColor();
-        Console.WriteLine("-------------------------------------------------------");
+        WriteLine();
     }
 
-    public static string FollowUpMessage(bool returnCommand = true)
+    public static string ManageCommands(bool returnCommand = true)
     {
-        Console.WriteLine("-------------------------------------------------------");
+        WriteLine();
         Console.ForegroundColor = ConsoleColor.Blue;
         Console.WriteLine("To enter a new product - enter: \"P\" | To search for a product - enter: \"S\" | To quit - enter: \"Q\"");
         Console.ResetColor();
@@ -157,33 +143,12 @@ class Message
         string command = Console.ReadLine() ?? String.Empty;
         char key = command.ToLower().Trim()[0];
 
-        //string action = "";
-        //switch (key.ToString())
-        //{
-        //    case "p": // Add new - resuse 
-        //        action = "p";
-        //        break;
-        //    case "s": // Search
-        //        action = "s";
-        //        break;
-        //    case "q": // Quit
-        //        action = "q";
-        //        break;
-        //    default:
-        //        action = "q";
-        //        break;
-        //}
-        //return action;
-
         if (!returnCommand)
-        {
             return "q";
-        }
         else return key.ToString();
     }
 
-
-    public static void PrintAllProducts(List<Product> products, bool hightlight = false, string productToHightlight = "")
+    public static void ShowAllProducts(List<Product> products, bool hightlight = false, string productToHightlight = "")
     {
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("Category\t\tProduct\t\t\tPrice");
@@ -210,25 +175,3 @@ class Message
         //Message.FollowUpMessage();
     }
 }
-
-
-
-
-//static void FindProductByName()
-//{
-
-//    Console.WriteLine("---------------------- FIND ---------------------------------");
-//    Console.Write("\nFind product: ");
-
-//    string findProduct = Console.ReadLine() ?? String.Empty;
-
-//    List<Product> foundProducts = Product.Find(productsList, findProduct);
-//    int count = foundProducts.Count;
-
-//    Console.Write($"Items with name '{findProduct}' - Found : {count}");
-//    foreach (Product product in foundProducts)
-//    {
-//        Console.WriteLine("\nFound: " + product.Name + " - " + product.Price);
-//    }
-//    Console.ReadKey();
-//}
